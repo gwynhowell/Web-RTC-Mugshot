@@ -1,23 +1,25 @@
 <html>
 
 <head>
-
+<title>Web RTC Mug Shot</title>
 <link rel="stylesheet" href="/css/style.css" />
 
 <style>
 
-.container { background: #e5ecf9; border: 1px solid #36c; width: 500px; border-radius: 5px; padding: 10px; text-align: center; margin: 20px auto; }
-#photo { background: #fff; width: 300px; height: 225px; display: none; }
+body { padding: 20px; }
+.container { background: #e5ecf9; border: 1px solid #36c; border-radius: 5px; padding: 10px; text-align: center; margin-top: 20px; }
+.about { font-size: 0.8em; font-style: italic; font-size: 0.8em; }
+.login { font-size: 0.8em; font-style: italic; font-size: 0.8em; text-align: right; }
+.wrapper { width: 500px; margin: auto; }
+#photo { background: #fff; width: 300px; height: 225px; }
 #video { background: #fff; width: 300px; height: 225px; }
 .controls { padding: 20px 0px 10px; }
 button { padding: 10px 20px; border-radius: 5px; }
 #mugshot_container { width: 900px; margin: auto; }
 .mugshot { width: 200px; }
 
-#btnSave { display: none; }
-#btnRetake { display: none; }
-#niceShot { display: none; }
-#saved { display: none; }
+.error {}
+.hide { display: none; }
 
 </style>
 
@@ -26,22 +28,35 @@ button { padding: 10px 20px; border-radius: 5px; }
 <body>
 <canvas id="canvas" style="display: none;"></canvas>
 
-<div class="container">
+<div class="login wrapper">
+	{% if user %}
+		Logged in as {{user.email()}} <a href="{{logout_url}}">logout</a>
+	{% else %}
+		<a href="{{login_url}}">Log in to save!</a>
+	{% endif %}
+</div>
+<div class="container wrapper">
 	<h2>Web RTC Mug Shot</h2>
 	
-	<p id="intro">To use this app you need to grant permission to use the webcam from the top right of the screen!</p>
-	<p id="niceShot">Nice Shot! Click Save Photo to upload to the server!</p>
-	<p id="saved">Your mugshot has been saved!</p>
+	<p id="msg"></p>
 	
 	<video id="video"></video>
-	<img src="" alt="" id="photo" alt="photo" >
+	<img src="" alt="" id="photo" alt="photo" class="hide" >
 	
 	<div class="controls">
 		<button id="btnCapture">Take photo</button>
-		<button id="btnRetake">Retake</button>
-		<button id="btnSave">Save photo</button>
+		<button id="btnRetake" class="hide">Retake</button>
+		<button id="btnSave" class="hide">Save photo</button>
 	</div>
-	
+</div>
+<div class="about wrapper">
+	<div style="float: left;">
+		<a href="http://www.webrtc.org/" target="_BLANK">About Web RTC</a>
+	</div>
+	<div style="float: right;">
+		<a href="https://github.com/gwynhowell/Web-RTC-Mugshot" target="_BLANK">Made by Gwyn Howell</a>
+	</div>
+	<div style="clear: both;"></div>
 </div>
 
 
@@ -51,13 +66,22 @@ button { padding: 10px 20px; border-radius: 5px; }
 <h3>Previous Mug Shots</h3>
 <div id="mugshots">
 {% for photo in photos %}
-<img src="/photo/{{photo.key().id()}}" class="mugshot" id="mugshot_{{photo.key().id()}}" data-id="{{photo.key().id()}}" />
+<img src="/photo/{{photo.key().id()}}" class="mugshot" id="mugshot_{{photo.key().id()}}" data-id="{{photo.key().id()}}" data-email="{{photo.user.email()}}" title="Taken by {{photo.user.email()}} on {{photo.timestamp.date()}}" />
 {% endfor %}
 </div>
 </div>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script src="/js/mugshot.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+{% if user %}
+var EMAIL = "{{user.email()}}";
+{% else %}
+var EMAIL = null;
+var LOGIN_URL = "{{login_url}}";
+{% endif %}
+</script>
 
 </body>
 

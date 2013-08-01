@@ -1,3 +1,4 @@
+from google.appengine.api import users
 from google.appengine.ext import db
 import base64
 import jinja2
@@ -15,10 +16,12 @@ class Photo(db.Model):
 
 class Home(webapp2.RequestHandler):
     def get(self):
-        template_values = {}
-        
         photos = Photo.gql('ORDER BY timestamp DESC').fetch(100)
-        template_values['photos'] = photos
+        
+        template_values = {'photos':photos,
+                           'user':users.get_current_user(),
+                           'login_url':users.create_login_url('/'),
+                           'logout_url':users.create_logout_url('/')}
         
         template = JINJA_ENVIRONMENT.get_template('index.html')
         self.response.write(template.render(template_values))
@@ -40,8 +43,14 @@ class Crud(webapp2.RequestHandler):
         self.response.out.write(photo.photo)
         
     def delete(self, photo_id):
+        user = users.get_current_user()
+        email = user.email() if user else None
         key = db.Key.from_path('Photo', long(photo_id))
-        db.delete(key)
+        photo = db.get(key)
+        if photo.user.email() == email:
+            db.delete(key)
+        else:
+            self.abort(403)
 
 app = webapp2.WSGIApplication(routes=[
                                       webapp2.Route('/', Home),
