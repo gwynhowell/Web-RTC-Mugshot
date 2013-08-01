@@ -69,7 +69,7 @@
 	
 	function savePicture() {
 		if (!EMAIL) {
-			if (confirm('You have to log in to save Mug Shots!\n\nLog in now?!'))
+			if (confirm('Please log in with your Google account to save your Mug Shot!\n\nLog in now?!'))
 				location.href = LOGIN_URL;
 			return;
 		}
